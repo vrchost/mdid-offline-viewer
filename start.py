@@ -1,26 +1,20 @@
-import logging
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
+
 PORT = 28800
-LOGFILE = 'start.log'
-
-
-logging.basicConfig(filename=LOGFILE, filemode='w', level=logging.DEBUG)
 
 
 class Server(HTTPServer):
 
-    def __init__(self, server_address, RequestHandlerClass,
-                 bind_and_activate=True):
-        super().__init__(server_address, RequestHandlerClass,
-                         bind_and_activate)
+    def __init__(self, server_address, handler_class, bind_and_activate=True):
+        super().__init__(server_address, handler_class, bind_and_activate)
         self.browser_opened = False
 
     def service_actions(self):
         if not self.browser_opened:
-            webbrowser.open_new(
-                'http://%s:%s/presentation/index.html' % self.server_address)
+            url = 'http://%s:%s/presentation/index.html' % self.server_address
+            webbrowser.open_new(url)
             self.browser_opened = True
 
 
@@ -33,12 +27,10 @@ class RequestHandler(SimpleHTTPRequestHandler):
 
 
 def serve(port, server_class=Server, handler_class=RequestHandler):
-    server_address = ('localhost', port)
+    server_address = ('127.0.0.1', port)
     try:
-        logging.debug('Trying to listen on port %s', port)
         httpd = server_class(server_address, handler_class)
     except OSError:
-        logging.info('Could not listen on port %s', port)
         return False
     try:
         httpd.serve_forever()
@@ -48,7 +40,6 @@ def serve(port, server_class=Server, handler_class=RequestHandler):
 
 
 def start(port):
-    print("starting")
     while not serve(port):
         port += 1
 
