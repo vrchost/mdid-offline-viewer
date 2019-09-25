@@ -2,7 +2,7 @@ import logging
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
-PORT = 8800
+PORT = 28800
 LOGFILE = 'start.log'
 
 

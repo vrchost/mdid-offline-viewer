@@ -1,0 +1,15 @@
+language: python
+python:
+  - 3.7
+os:
+  - osx
+  - windows
+  - linux
+install:
+  - pip install -r requirements.txt
+script:
+  - pyinstaller --onefile --clean --distpath dist start.py
+addons:
+  artifacts:
+    working_dir: dist
+    target_paths: /${TRAVIS_OS_NAME}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}
