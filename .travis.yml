@@ -12,4 +12,4 @@ script:
 addons:
   artifacts:
     working_dir: dist
-    target_paths: /${TRAVIS_OS_NAME}/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}
+    target_paths: /mdid-offline-viewer/${TRAVIS_OS_NAME}/${TRAVIS_BUILD_NUMBER}
