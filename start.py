@@ -1,8 +1,15 @@
+import os
+import sys
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 
 PORT = 28800
+
+
+application_path = None
+if getattr(sys, 'frozen', False):
+    application_path = os.path.dirname(sys.executable)
 
 
 class Server(HTTPServer):
@@ -20,10 +27,20 @@ class Server(HTTPServer):
 
 class RequestHandler(SimpleHTTPRequestHandler):
 
+    def __init__(self, *args, directory=None, **kwargs):
+        if directory is None and application_path:
+            directory = application_path
+        super().__init__(*args, directory=directory, **kwargs)
+
     def do_GET(self):
+        self.path = self.path.rstrip('/')
         if self.path == '/exit':
             raise KeyboardInterrupt
         super().do_GET()
+
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-cache")
+        super().end_headers()
 
 
 def serve(port, server_class=Server, handler_class=RequestHandler):
