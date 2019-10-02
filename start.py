@@ -50,6 +50,7 @@ class Server(ThreadingMixIn, HTTPServer):
             webbrowser.open_new(url)
             self.browser_opened = True
             print(INFO % url)
+            sys.stdout.flush()
 
 
 class RequestHandler(SimpleHTTPRequestHandler):
