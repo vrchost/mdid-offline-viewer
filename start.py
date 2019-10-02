@@ -1,10 +1,35 @@
 import os
 import sys
 import webbrowser
+from http import HTTPStatus
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 
 PORT = 28800
+
+EXIT_PAGE = b"""
+<html>
+<head>
+<title>Viewer</title>
+</head>
+<body>
+<div style="text-align: center; font-size: x-large; margin-top: 5em;">
+You may now close this browser window.
+</div>
+</body>
+</html>
+"""
+
+INFO = """
+Server started; the viewer should have opened automatically in a browser.
+If it has not, go to %s
+
+Please do not close this window.
+"""
+
+INFO_END = """
+Viewer exited; you may now close this window.
+"""
 
 
 application_path = None
@@ -23,6 +48,8 @@ class Server(HTTPServer):
             url = 'http://%s:%s/presentation/index.html' % self.server_address
             webbrowser.open_new(url)
             self.browser_opened = True
+            print(INFO % url)
+
 
 
 class RequestHandler(SimpleHTTPRequestHandler):
@@ -32,15 +59,24 @@ class RequestHandler(SimpleHTTPRequestHandler):
             directory = application_path
         super().__init__(*args, directory=directory, **kwargs)
 
+    def exit_page(self):
+        self.send_response(HTTPStatus.OK)
+        self.end_headers()
+        self.wfile.write(EXIT_PAGE)
+
     def do_GET(self):
         self.path = self.path.rstrip('/')
         if self.path == '/exit':
+            self.exit_page()
             raise KeyboardInterrupt
         super().do_GET()
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-cache")
         super().end_headers()
+
+    def log_message(self, format, *args):
+        pass
 
 
 def serve(port, server_class=Server, handler_class=RequestHandler):
@@ -53,6 +89,7 @@ def serve(port, server_class=Server, handler_class=RequestHandler):
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
+    print(INFO_END)
     return True
 
 
