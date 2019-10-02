@@ -3,7 +3,7 @@ import sys
 import webbrowser
 from http import HTTPStatus
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-
+from socketserver import ThreadingMixIn
 
 PORT = 28800
 
@@ -37,11 +37,12 @@ if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
 
 
-class Server(HTTPServer):
+class Server(ThreadingMixIn, HTTPServer):
 
     def __init__(self, server_address, handler_class, bind_and_activate=True):
-        super().__init__(server_address, handler_class, bind_and_activate)
+        HTTPServer.__init__(self, server_address, handler_class, bind_and_activate)
         self.browser_opened = False
+        self.daemon_threads = True
 
     def service_actions(self):
         if not self.browser_opened:
@@ -49,7 +50,6 @@ class Server(HTTPServer):
             webbrowser.open_new(url)
             self.browser_opened = True
             print(INFO % url)
-
 
 
 class RequestHandler(SimpleHTTPRequestHandler):
@@ -68,8 +68,9 @@ class RequestHandler(SimpleHTTPRequestHandler):
         self.path = self.path.rstrip('/')
         if self.path == '/exit':
             self.exit_page()
-            raise KeyboardInterrupt
-        super().do_GET()
+            self.server.shutdown()
+        else:
+            super().do_GET()
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-cache")
@@ -89,9 +90,9 @@ def serve(port, server_class=Server, handler_class=RequestHandler):
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
+    httpd.server_close()
     print(INFO_END)
     return True
-
 
 def start(port):
     while not serve(port):
