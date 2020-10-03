@@ -21,7 +21,7 @@ You may now close this browser window.
 """
 
 INFO = """
-Server started; the viewer should have opened automatically in a browser.
+Viewer started; a new browser window should have opened automatically.
 If it has not, go to %s
 
 Please do not close this window.
