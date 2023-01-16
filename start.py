@@ -73,6 +73,11 @@ class RequestHandler(SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+    def send_head(self):
+        if "If-Modified-Since" in self.headers:
+            del self.headers["If-Modified-Since"]
+        return super().send_head()
+
     def end_headers(self):
         self.send_header("Cache-Control", "no-cache")
         super().end_headers()
