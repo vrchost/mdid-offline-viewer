@@ -5,8 +5,6 @@ from http import HTTPStatus
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
 
-PORT = 28800
-
 EXIT_PAGE = b"""
 <html>
 <head>
@@ -86,8 +84,8 @@ class RequestHandler(SimpleHTTPRequestHandler):
         pass
 
 
-def serve(port, server_class=Server, handler_class=RequestHandler):
-    server_address = ('127.0.0.1', port)
+def serve(server_class=Server, handler_class=RequestHandler):
+    server_address = ('127.0.0.1', 0)
     try:
         httpd = server_class(server_address, handler_class)
     except OSError:
@@ -100,10 +98,6 @@ def serve(port, server_class=Server, handler_class=RequestHandler):
     print(INFO_END)
     return True
 
-def start(port):
-    while not serve(port):
-        port += 1
-
 
 if __name__ == '__main__':
-    start(PORT)
+    serve()
